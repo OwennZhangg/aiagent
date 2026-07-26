@@ -1,8 +1,6 @@
-langchain 
-wikipedia 
-langchain-community 
-langchain-openai
-langchain-anthropic
+playwright
+openai
 python-dotenv
-pydantic
-duckduckgo-search
+httpx
+
+
