@@ -1,5 +1,6 @@
 from browser import search_google_images
-
+from config import IMAGE_DIR
+from downloader import download_image
 
 def main() -> None:
 
@@ -12,10 +13,19 @@ def main() -> None:
 
     image_urls = search_google_images(prompt)
 
-    print(f"Collected {len(image_urls)} candidate URLs")
+    if not image_urls:
+        print("No candidate images found.")
+        return
 
-    for index, url in enumerate(image_urls, start=1):
-        print(index, url)
+    first_candidate = IMAGE_DIR / "candidate1.jpg"
+
+    download_image(
+        image_urls[0],
+        first_candidate,
+    )
+
+    print(f"Downloaded: {first_candidate}")
+
 
 
 if __name__ == "__main__":
