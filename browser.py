@@ -17,8 +17,10 @@ def search_google_images(prompt: str) -> list[str]:
         search_box.press("Enter")
 
         page.wait_for_url("**/search?**")
-
-        input("complete any google verification, then press enter")
+        input(
+            "Complete any Google verification, wait for the images to load, "
+            "then press Enter"
+        )
         images = page.locator("img")
         image_count = images.count()
 
@@ -46,4 +48,3 @@ def search_google_images(prompt: str) -> list[str]:
 
         browser.close()
         return image_urls
-

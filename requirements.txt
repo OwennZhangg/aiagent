@@ -2,5 +2,8 @@ playwright
 openai
 python-dotenv
 httpx
+pydantic
+
+
 
 
