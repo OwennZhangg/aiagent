@@ -20,9 +20,9 @@ original picture-agent plan.
 
 ## Current status
 
-The repository has been reorganized for the V1 architecture. The existing
-picture-search workflow remains runnable while the four production stages are
-implemented incrementally.
+The repository has been reorganized for the V1 architecture. The Planning
+Agent is implemented; the remaining production stages will be added
+incrementally. The reusable picture-search code remains available in `tools/`.
 
 ```text
 aiagent/
@@ -41,8 +41,8 @@ aiagent/
 └── output/
 ```
 
-At this milestone, `main.py` still runs the original picture-agent flow. The
-agent modules are the scaffold for the next implementation steps.
+At this milestone, `main.py` accepts a topic and prints the structured plan
+created by the Planning Agent.
 
 ## Setup
 
