@@ -1,8 +1,7 @@
-from browser import search_google_images
 from config import IMAGE_DIR
-from downloader import download_images
-from selector import select_best_image
-from downloader import download_images, save_selected_image
+from tools.browser import search_google_images
+from tools.downloader import download_images, save_selected_image
+from tools.selector import select_best_image
 
 
 def main() -> None:
@@ -28,12 +27,12 @@ def main() -> None:
     for candidate_path in candidate_paths:
         print(f"Downloaded: {candidate_path}")
 
-    selected_path = select_best_image(prompt,candidate_paths)
+    selected_path = select_best_image(prompt, candidate_paths)
 
     print(f"Openai ai selected: {selected_path}")
 
     final_path = save_selected_image(
-        selected_path, 
+        selected_path,
         IMAGE_DIR,
     )
 

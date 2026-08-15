@@ -5,8 +5,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from typing import Literal
-
 from pydantic import BaseModel, Field
 
 
