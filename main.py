@@ -1,43 +1,22 @@
-from config import IMAGE_DIR
-from tools.browser import search_google_images
-from tools.downloader import download_images, save_selected_image
-from tools.selector import select_best_image
+from agents.planning import planning_agent
 
 
 def main() -> None:
+    topic = input("What video are you making today? ").strip()
 
-    prompt = input("enter image search: ").strip()
-
-    if not prompt:
-        print("error, can't be empty")
-        return
-    print(f"searching google images for: {prompt}")
-
-    image_urls = search_google_images(prompt)
-
-    if not image_urls:
-        print("No candidate images found.")
+    if not topic:
+        print("Error: topic can't be empty.")
         return
 
-    candidate_paths = download_images(
-        image_urls,
-        IMAGE_DIR,
-    )
+    print("Planning video...")
 
-    for candidate_path in candidate_paths:
-        print(f"Downloaded: {candidate_path}")
+    try:
+        plan = planning_agent(topic)
+    except Exception as error:
+        print(f"Could not create video plan: {error}")
+        return
 
-    selected_path = select_best_image(prompt, candidate_paths)
-
-    print(f"Openai ai selected: {selected_path}")
-
-    final_path = save_selected_image(
-        selected_path,
-        IMAGE_DIR,
-    )
-
-    print(f"final image saved: {final_path}")
-
+    print(plan.model_dump_json(indent=2))
 
 
 if __name__ == "__main__":
