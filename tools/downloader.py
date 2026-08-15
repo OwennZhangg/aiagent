@@ -1,8 +1,9 @@
 """Download and save candidate images."""
+
+import shutil
 from pathlib import Path
 
 import httpx
-import shutil
 
 
 def download_image(image_url: str, output_path: Path) -> bool:
@@ -47,6 +48,7 @@ def download_images(
 
     return downloaded_paths
 
+
 def save_selected_image(
     selected_path: Path,
     image_directory: Path,
@@ -59,4 +61,3 @@ def save_selected_image(
     )
 
     return output_path
-

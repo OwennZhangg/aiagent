@@ -1,5 +1,7 @@
 from playwright.sync_api import sync_playwright
 
+from config import CANDIDATE_COUNT
+
 GOOGLE_IMAGES_URL = "https://images.google.com/"
 
 
@@ -43,7 +45,7 @@ def search_google_images(prompt: str) -> list[str]:
 
             image_urls.append(source)
 
-            if len(image_urls) == 5:
+            if len(image_urls) == CANDIDATE_COUNT:
                 break
 
         browser.close()

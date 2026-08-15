@@ -31,3 +31,6 @@ dist/
 
 images/
 
+# Generated video-production runs
+output/*
+!output/.gitkeep
