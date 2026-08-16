@@ -4,17 +4,17 @@ import unittest
 from types import SimpleNamespace
 
 from agents.planning import planning_agent
-from models import PlannedScene, VideoPlan
+from models import PlannedBeat, VideoPlan
 
 
-def make_plan(scene_numbers: list[int] | None = None) -> VideoPlan:
-    numbers = scene_numbers or [1, 2, 3, 4, 5]
+def make_plan(beat_numbers: list[int] | None = None) -> VideoPlan:
+    numbers = beat_numbers or [1, 2, 3, 4, 5, 6, 7, 8]
     return VideoPlan(
         title="Why F1 Killed the V10",
         hook="V10s sounded incredible, so why did F1 get rid of them?",
         angle="Trace the forces behind F1's move away from V10 engines.",
-        scenes=[
-            PlannedScene(scene=number, purpose=f"Purpose {number}")
+        beats=[
+            PlannedBeat(beat=number, purpose=f"Purpose {number}")
             for number in numbers
         ],
     )
@@ -59,10 +59,33 @@ class PlanningAgentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "did not return"):
             planning_agent("A valid topic", client=FakeClient(None))
 
-    def test_rejects_non_sequential_scene_numbers(self) -> None:
-        invalid_plan = make_plan([1, 2, 4, 5])
+    def test_rejects_fewer_than_six_beats(self) -> None:
+        invalid_plan = make_plan([1, 2, 3, 4, 5])
 
-        with self.assertRaisesRegex(ValueError, "invalid scene numbering"):
+        with self.assertRaisesRegex(ValueError, "between 6 and 10 beats"):
+            planning_agent("A valid topic", client=FakeClient(invalid_plan))
+
+    def test_rejects_more_than_ten_beats(self) -> None:
+        invalid_plan = make_plan(list(range(1, 12)))
+
+        with self.assertRaisesRegex(ValueError, "between 6 and 10 beats"):
+            planning_agent("A valid topic", client=FakeClient(invalid_plan))
+
+    def test_accepts_six_and_ten_beats(self) -> None:
+        for count in (6, 10):
+            expected_plan = make_plan(list(range(1, count + 1)))
+
+            result = planning_agent(
+                "A valid topic",
+                client=FakeClient(expected_plan),
+            )
+
+            self.assertEqual(result, expected_plan)
+
+    def test_rejects_non_sequential_beat_numbers(self) -> None:
+        invalid_plan = make_plan([1, 2, 3, 4, 6, 7])
+
+        with self.assertRaisesRegex(ValueError, "invalid beat numbering"):
             planning_agent("A valid topic", client=FakeClient(invalid_plan))
 
 

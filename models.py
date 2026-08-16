@@ -3,8 +3,8 @@
 from pydantic import BaseModel, Field
 
 
-class PlannedScene(BaseModel):
-    scene: int = Field(ge=1)
+class PlannedBeat(BaseModel):
+    beat: int = Field(ge=1)
     purpose: str
 
 
@@ -12,19 +12,26 @@ class VideoPlan(BaseModel):
     title: str
     hook: str
     angle: str
-    scenes: list[PlannedScene]
+    beats: list[PlannedBeat]
 
 
-class ProductionScene(BaseModel):
-    scene: int = Field(ge=1)
+class ProductionBeat(BaseModel):
+    beat: int = Field(ge=1)
     purpose: str
     script: str
-    picture_description: str
-    search_query: str
+    visual_needed: bool
+    visual_type: str | None = None
+    picture_description: str | None = None
+    search_query: str | None = None
 
 
-class FinalScene(BaseModel):
-    scene: int = Field(ge=1)
+class ProductionPlan(BaseModel):
+    title: str
+    beats: list[ProductionBeat]
+
+
+class FinalBeat(BaseModel):
+    beat: int = Field(ge=1)
     script: str
     picture: str | None
     on_screen_text: str
