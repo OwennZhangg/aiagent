@@ -8,16 +8,17 @@ The user gives one topic:
 
 > Why did Formula 1 stop using V10 engines?
 
-The system prepares everything needed to film and edit the video:
+The system prepares everything needed to film one continuous talking-head take and edit it into a fast, visually active reel:
 
 * title
 * video structure
-* scene scripts
-* image requirements
+* short script beats
+* selective supporting-image requirements
+* an editable script approval checkpoint before image searches
 * downloaded supporting images
 * on-screen text
 * editing notes
-* estimated duration
+* estimated duration (usually 1–3 seconds per beat)
 
 The user still films themselves and assembles the final video manually.
 
@@ -32,6 +33,8 @@ Planning Agent
   ↓
 Production Agent
   ↓
+Script approval gate
+  ↓
 Image Agent
   ↓
 Composer Agent
@@ -41,13 +44,15 @@ Final production guide
 
 There are **4 agents total**.
 
+The approval gate is a human checkpoint, not another agent.
+
 ---
 
 # 3. Agent 1 — Planning Agent
 
 ## Purpose
 
-Turn the topic into a rough video structure.
+Turn the topic into a sequence of short, connected script beats.
 
 It answers:
 
@@ -65,26 +70,30 @@ Why did Formula 1 stop using V10 engines?
 {
   "title": "Why F1 Killed the V10",
   "hook": "F1 V10s sounded incredible, so why did Formula 1 get rid of them?",
-  "scenes": [
+  "beats": [
     {
-      "scene": 1,
-      "purpose": "Hook the viewer"
+      "beat": 1,
+      "purpose": "Create immediate curiosity"
     },
     {
-      "scene": 2,
-      "purpose": "Explain the V10 era"
+      "beat": 2,
+      "purpose": "Establish why fans loved the V10"
     },
     {
-      "scene": 3,
-      "purpose": "Explain why regulations changed"
+      "beat": 3,
+      "purpose": "Introduce the first reason regulations changed"
     },
     {
-      "scene": 4,
-      "purpose": "Explain what replaced the V10"
+      "beat": 4,
+      "purpose": "Explain the efficiency and manufacturer pressure"
     },
     {
-      "scene": 5,
-      "purpose": "Give a short conclusion"
+      "beat": 5,
+      "purpose": "Show what replaced the V10"
+    },
+    {
+      "beat": 6,
+      "purpose": "Deliver the payoff"
     }
   ]
 }
@@ -97,8 +106,8 @@ The Planning Agent should generate:
 * title
 * hook
 * overall angle
-* number of scenes
-* purpose of each scene
+* number of short beats
+* purpose of each beat
 
 It should **not** search for images or write detailed editing instructions.
 
@@ -108,7 +117,7 @@ It should **not** search for images or write detailed editing instructions.
 
 ## Purpose
 
-Take the rough structure and determine exactly what is needed for each scene.
+Take the rough structure and determine exactly what the creator says in each beat and whether a supporting visual is useful.
 
 It answers:
 
@@ -120,13 +129,15 @@ The Planning Agent output.
 
 ## Output
 
-For every scene:
+For every beat:
 
 ```json
 {
-  "scene": 2,
-  "purpose": "Explain the V10 era",
-  "script": "In the early 2000s, Formula 1 cars used screaming 3-litre V10 engines.",
+  "beat": 2,
+  "purpose": "Establish why fans loved the V10",
+  "script": "They were loud, fast, and completely unforgettable.",
+  "visual_needed": true,
+  "visual_type": "photo overlay",
   "picture_description": "Ferrari F2004 Formula 1 car racing on track during the V10 era",
   "search_query": "Ferrari F2004 racing V10 Formula 1 2004"
 }
@@ -136,9 +147,13 @@ For every scene:
 
 The Production Agent generates:
 
-* final scene script
-* description of the desired picture
-* descriptive image search query
+* one short, conversational script line per beat
+* whether a supporting visual is needed
+* visual type and placement when needed
+* description of the desired picture when needed
+* descriptive image search query when needed
+
+The creator remains the main visual. Do not assign a picture to every beat. Some beats should intentionally be talking-head only so the edit has room to breathe.
 
 The search query should be specific and visual.
 
@@ -156,19 +171,49 @@ Ferrari F2004 red Formula 1 car racing 2004 V10
 
 ---
 
-# 5. Agent 3 — Image Agent
+# 5. Script Approval Gate
 
 ## Purpose
 
-Find the best supporting image for each scene.
+Let the creator review and edit the complete script before the system starts the expensive image workflow.
+
+```text
+Topic
+  → plan
+  → production script
+  → write script.md
+  → creator reviews and edits
+  → creator presses Enter
+  → image work may begin
+```
+
+The program must pause after writing:
+
+```text
+output/video-name/script.md
+```
+
+The creator can edit the spoken lines directly in that file. After Enter is pressed, the program reloads those edits and saves the approved structured production data.
+
+No Google Images searches, candidate downloads, or vision-selection calls may run before this approval step completes successfully. If the script is wrong, the run can stop here without spending the image-search cost.
+
+This checkpoint should remain simple. V1 does not need a GUI or approval database.
+
+---
+
+# 6. Agent 3 — Image Agent
+
+## Purpose
+
+Find the best supporting image for each beat that actually needs one.
 
 It answers:
 
-> Which picture best matches what this scene needs?
+> Which picture best supports what this beat is saying?
 
 ## Input
 
-For each scene:
+For each beat where `visual_needed` is `true`:
 
 ```text
 script
@@ -199,7 +244,7 @@ Reuse the existing browser, downloader, and image-selection system.
 Example:
 
 ```text
-output/video-name/scenes/scene2/selected.jpg
+output/video-name/beats/beat2/selected.jpg
 ```
 
 ## V1 Behavior
@@ -207,12 +252,13 @@ output/video-name/scenes/scene2/selected.jpg
 If no good image is found:
 
 * do not crash the entire run
-* mark the scene as missing an image
-* continue to the next scene
+* leave the creator visible with no overlay
+* mark the beat as missing an image
+* continue to the next beat
 
 ---
 
-# 6. Agent 4 — Composer Agent
+# 7. Agent 4 — Composer Agent
 
 ## Purpose
 
@@ -237,15 +283,15 @@ selected image paths
 ```markdown
 # Why F1 Killed the V10
 
-## Scene 1
+## Beat 1 (0:00–0:02)
 
 ### Script
 
 F1 V10s sounded incredible, so why did Formula 1 get rid of them?
 
-### Picture
+### Supporting visual
 
-scenes/scene1/selected.jpg
+None — creator only
 
 ### On-screen text
 
@@ -253,51 +299,51 @@ Why did F1 kill the V10?
 
 ### Editing note
 
-Start with the talking-head shot. Cut to the F1 image immediately after saying "V10s."
+Start immediately on the creator. Use a quick punch-in on “V10s.”
 
 ### Estimated duration
 
-4 seconds
+2 seconds
 
 
-## Scene 2
+## Beat 2 (0:02–0:05)
 
 ### Script
 
-In the early 2000s, Formula 1 cars used screaming 3-litre V10 engines.
+They were loud, fast, and completely unforgettable.
 
-### Picture
+### Supporting visual
 
-scenes/scene2/selected.jpg
+beats/beat2/selected.jpg
 
 ### On-screen text
 
-3.0L V10
+LOUD. FAST. UNFORGETTABLE.
 
 ### Editing note
 
-Show the Ferrari image while mentioning the V10 era, then return to the talking-head shot.
+Keep the creator visible and place the Ferrari image above their shoulder. Remove it at the end of the beat.
 
 ### Estimated duration
 
-7 seconds
+3 seconds
 ```
 
 ## Composer Responsibilities
 
-For each scene, the Composer produces:
+For each beat, the Composer produces:
 
 * script
-* selected picture
-* on-screen text
+* selected supporting picture, if needed
+* short on-screen text, only when it adds emphasis or clarity
 * editing note
 * estimated duration
 
-The Composer should make the result clean and easy to follow while filming and editing.
+The Composer should treat the continuous talking-head recording as the base layer. Supporting visuals usually appear as overlays around or above the creator, with occasional creator-only beats to avoid visual clutter. Full-screen B-roll should be rare and intentional.
 
 ---
 
-# 7. Output Folder
+# 8. Output Folder
 
 Each run creates a new folder.
 
@@ -307,9 +353,11 @@ output/
     │
     ├── production-guide.md
     ├── plan.json
+    ├── script.md
+    ├── production.json
     │
-    └── scenes/
-        ├── scene1/
+    └── beats/
+        ├── beat1/
         │   ├── candidate1.jpg
         │   ├── candidate2.jpg
         │   ├── candidate3.jpg
@@ -317,10 +365,10 @@ output/
         │   ├── candidate5.jpg
         │   └── selected.jpg
         │
-        ├── scene2/
+        ├── beat2/
         │   └── ...
         │
-        └── scene3/
+        └── beat3/
             └── ...
 ```
 
@@ -329,22 +377,24 @@ For V1, these are the only important final files:
 ```text
 production-guide.md
 plan.json
-scenes/
+script.md
+production.json
+beats/
 ```
 
 No database or frontend is needed.
 
 ---
 
-# 8. Simple Data Models
+# 9. Simple Data Models
 
 Use Pydantic.
 
 ## Plan
 
 ```python
-class PlannedScene(BaseModel):
-    scene: int
+class PlannedBeat(BaseModel):
+    beat: int
     purpose: str
 
 
@@ -352,35 +402,37 @@ class VideoPlan(BaseModel):
     title: str
     hook: str
     angle: str
-    scenes: list[PlannedScene]
+    beats: list[PlannedBeat]
 ```
 
-## Production Scene
+## Production Beat
 
 ```python
-class ProductionScene(BaseModel):
-    scene: int
+class ProductionBeat(BaseModel):
+    beat: int
     purpose: str
     script: str
-    picture_description: str
-    search_query: str
+    visual_needed: bool
+    visual_type: str | None
+    picture_description: str | None
+    search_query: str | None
 ```
 
-## Final Scene
+## Final Beat
 
 ```python
-class FinalScene(BaseModel):
-    scene: int
+class FinalBeat(BaseModel):
+    beat: int
     script: str
     picture: str | None
-    on_screen_text: str
+    on_screen_text: str | None
     editing_note: str
     estimated_duration: float
 ```
 
 ---
 
-# 9. File Structure
+# 10. File Structure
 
 Keep V1 small.
 
@@ -411,7 +463,7 @@ The existing image-search code can move into `tools/` with minimal changes.
 
 ---
 
-# 10. Main Program
+# 11. Main Program
 
 Keep `main.py` simple.
 
@@ -422,11 +474,18 @@ plan = planning_agent(topic)
 
 production = production_agent(plan)
 
-images = image_agent(production)
+script_path = save_script_for_review(production)
+
+approved_production = wait_for_script_approval(
+    production,
+    script_path
+)
+
+images = image_agent(approved_production)
 
 final = composer_agent(
     plan=plan,
-    production=production,
+    production=approved_production,
     images=images
 )
 
@@ -437,7 +496,7 @@ save_production_guide(final)
 
 ---
 
-# 11. Implementation Order
+# 12. Implementation Order
 
 ## Step 1 — Planning Agent
 
@@ -449,7 +508,7 @@ topic
 title
 hook
 angle
-scene purposes
+beat purposes
 ```
 
 Test with 5 different video topics.
@@ -463,9 +522,9 @@ Build:
 ```text
 video plan
 ↓
-scene scripts
-picture descriptions
-search queries
+short beat scripts
+visual decisions
+picture descriptions and search queries only where useful
 ```
 
 At this point, manually inspect whether the queries would actually work in Google Images.
@@ -474,7 +533,17 @@ At this point, manually inspect whether the queries would actually work in Googl
 
 ## Step 3 — Connect Existing Image Tool
 
-Reuse the current:
+Before connecting the image tool, add the human checkpoint:
+
+```text
+production output
+→ write script.md
+→ pause for review and edits
+→ reload approved script
+→ continue
+```
+
+Test that the image tool cannot be called before approval. Then reuse the current:
 
 ```text
 Google Images
@@ -482,7 +551,7 @@ Google Images
 → AI vision selector
 ```
 
-Run it once for every scene.
+Run it only for beats that need a supporting picture.
 
 ---
 
@@ -494,11 +563,11 @@ Generate:
 production-guide.md
 ```
 
-For every scene include:
+For every beat include:
 
 ```text
 Script
-Picture
+Supporting visual (or creator only)
 On-screen text
 Editing note
 Estimated duration
@@ -522,18 +591,22 @@ What video are you making today?
 > Why did Formula 1 stop using V10 engines?
 
 Planning video...
-✓ 5 scenes created
+✓ 8 short beats created
 
-Preparing scenes...
+Preparing beats...
 ✓ Scripts created
 ✓ Image queries created
+✓ Script ready: output/why-f1-killed-the-v10/script.md
+
+Review and edit script.md, save it, then press Enter to approve the script and continue to images:
+✓ Script approved
 
 Finding images...
-Scene 1/5 ✓
-Scene 2/5 ✓
-Scene 3/5 ✓
-Scene 4/5 ✓
-Scene 5/5 ✓
+Beat 1/8 — creator only ✓
+Beat 2/8 — image selected ✓
+Beat 3/8 — image selected ✓
+...
+Beat 8/8 — creator only ✓
 
 Composing production guide...
 ✓ Done
@@ -545,28 +618,37 @@ Then actually use the guide to make one real video.
 
 ---
 
-# 12. V1 Definition of Done
+# 13. V1 Definition of Done
 
 V1 is finished when:
 
 * [ ] User enters one topic
 * [ ] Planning Agent generates a useful video structure
-* [ ] Production Agent writes each scene's script
-* [ ] Production Agent creates descriptive image queries
+* [ ] Planning Agent creates a fast hook with no greeting or slow setup
+* [ ] Production Agent writes concise 1–3 second script beats
+* [ ] Production Agent decides whether each beat needs a supporting visual
+* [ ] Production Agent creates descriptive image queries only where useful
+* [ ] Production Agent writes an editable `script.md`
+* [ ] Program pauses for human script review
+* [ ] Human edits in `script.md` are reloaded after approval
+* [ ] No image searches, downloads, or vision calls happen before approval
 * [ ] Image Agent searches Google Images
 * [ ] Image Agent downloads candidates
 * [ ] Existing vision model chooses the best candidate
-* [ ] Each scene has a selected picture when possible
+* [ ] Each visual beat has a selected picture when possible
+* [ ] Some beats intentionally remain creator-only
 * [ ] Composer Agent generates on-screen text
 * [ ] Composer Agent generates editing notes
-* [ ] Composer Agent estimates scene duration
+* [ ] Composer Agent keeps the creator visible for most of the video
+* [ ] Composer Agent describes overlay placement instead of defaulting to full-screen B-roll
+* [ ] Composer Agent estimates beat duration
 * [ ] `production-guide.md` is generated
 * [ ] One failed image does not break the entire run
 * [ ] The production guide is useful enough to make a real video from
 
 ---
 
-# 13. Do Not Build Yet
+# 14. Do Not Build Yet
 
 Keep V1 focused.
 
@@ -594,7 +676,7 @@ These can come later if the basic workflow proves useful.
 
 ---
 
-# 14. V1 Product
+# 15. V1 Product
 
 The entire V1 should do one thing well:
 
@@ -605,6 +687,10 @@ The entire V1 should do one thing well:
             ↓
       Production Agent
             ↓
+   Review/edit script.md
+            ↓
+       Press Enter
+            ↓
         Image Agent
             ↓
        Composer Agent
@@ -614,6 +700,6 @@ The entire V1 should do one thing well:
 
 The final guide tells the creator:
 
-> **what to say, what picture to use, what text to put on screen, how to edit the scene, and approximately how long the scene should last.**
+> **what to say in each short beat, when to use a supporting visual, what text to put on screen, how to place the overlay while keeping the creator visible, and approximately how long each beat should last.**
 
 Then the creator films and edits the video themselves.

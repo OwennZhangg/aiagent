@@ -1,6 +1,6 @@
 # AI Video Production Assistant
 
-A small Python project that turns a video topic into a scene-by-scene
+A small Python project that turns a video topic into a beat-by-beat
 production guide with scripts, supporting images, on-screen text, editing
 notes, and estimated durations.
 
@@ -10,6 +10,7 @@ The planned V1 workflow is:
 Topic
   -> Planning Agent
   -> Production Agent
+  -> Review/edit script.md and approve
   -> Image Agent
   -> Composer Agent
   -> production-guide.md
@@ -20,9 +21,11 @@ original picture-agent plan.
 
 ## Current status
 
-The repository has been reorganized for the V1 architecture. The Planning
-Agent is implemented; the remaining production stages will be added
-incrementally. The reusable picture-search code remains available in `tools/`.
+The Planning Agent is implemented. The Production Agent is the next
+test-driven milestone: its expected behavior is captured in
+`tests/test_production.py`, while `agents/production.py` is intentionally left
+for implementation. The reusable picture-search code remains available in
+`tools/`.
 
 ```text
 aiagent/
@@ -42,7 +45,8 @@ aiagent/
 ```
 
 At this milestone, `main.py` accepts a topic and prints the structured plan
-created by the Planning Agent.
+created by the Planning Agent. Build the Production Agent against its tests,
+then connect the documented `script.md` approval checkpoint before image work.
 
 ## Setup
 
