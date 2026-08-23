@@ -6,6 +6,8 @@ from agents.production import (
     save_script_for_review,
     wait_for_script_approval,
 )
+from agents.image import image_agent
+
 from config import OUTPUT_DIR
 
 def _topic_slug(topic: str) -> str:
@@ -87,7 +89,22 @@ def main() -> None:
 
     print("✓ Script approved")
     print(f"✓ Approved production plan: {production_path}")
-    print("Image work is now allowed to begin.")
+    print("Finding supporting images...")
+
+    selected_images = image_agent(
+        approved_production,
+        run_directory,
+    )
+
+    successful_images = sum(
+        path is not None
+        for path in selected_images.values()
+    )
+
+    print(
+        f"✓ Image work complete: "
+        f"{successful_images} images selected"
+    )
 
 if __name__ == "__main__":
     main()
