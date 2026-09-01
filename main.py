@@ -1,12 +1,18 @@
 import re
 
 from agents.planning import planning_agent
+
 from agents.production import (
     production_agent,
     save_script_for_review,
     wait_for_script_approval,
 )
 from agents.image import image_agent
+
+from agents.composer import (
+    composer_agent,
+    save_production_guide,
+)
 
 from config import OUTPUT_DIR
 
@@ -105,6 +111,28 @@ def main() -> None:
         f"✓ Image work complete: "
         f"{successful_images} images selected"
     )
+    print("Composing final production guide...")
+
+    try:
+        final_guide = composer_agent(
+        approved_production,
+        selected_images,
+    )
+    except Exception as error:
+        print(
+            f"Cloud not compose final production gudie: {error}"
+        )
+        return
+    
+    guide_path = save_production_guide(
+        final_guide,
+        run_directory / "production-guide.md",
+    )
+
+    print("✓ Production guide complete")
+    print(f"✓ Final guide: {guide_path}")
+
+
 
 if __name__ == "__main__":
     main()
