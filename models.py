@@ -37,3 +37,7 @@ class FinalBeat(BaseModel):
     on_screen_text: str
     editing_note: str
     estimated_duration: float = Field(ge=0)
+class FinalGuide(BaseModel):
+    title: str
+    beats: list[FinalBeat]
+
